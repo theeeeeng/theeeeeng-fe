@@ -3,8 +3,12 @@ import type { NextPage } from 'next';
 import React, {useState, useRef, useEffect, ChangeEvent} from 'react';
 import styled from 'styled-components';
 import { LoginError, LoginForm } from '../types/login';
+import { useUserDispatch } from '../context/User';
+import { useRouter } from 'next/router';
 
 const LoginPage: NextPage = () => {
+  const router = useRouter();
+  const userDispatch = useUserDispatch();
   const [form, setForm] = useState<LoginForm>({
     id: '',
     password: ''
@@ -14,15 +18,21 @@ const LoginPage: NextPage = () => {
     password: undefined
   });
 
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!!userId) {
+      router.push('/');
+    }
+  }, []);
+
   const handleChange = (type: 'id' | 'password', event: ChangeEvent<HTMLInputElement>) => {
     if (type === 'id') {
       const id = event.target.value;
       setForm({id, password: form.password});
     } else if (type === 'password') {
       const password = event.target.value;
-      setForm({id: form.id, password});
+      setForm({id: form.id, password}); 
     }
-
   };
 
   const handleBlur = (type: 'id' | 'password') => {
@@ -40,6 +50,28 @@ const LoginPage: NextPage = () => {
       return (form.password.length > 0 && /^[A-za-z0-9]{8,30}$/.test(form.password));
     }
     return false;
+  };
+
+  const onLogin = () => {
+    const {id, password} = form;
+    const login = fetch('https://api.sixshop.com/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({id, password})
+    }).then(res => res.json()).then(({data}) => {
+      const {accessToken, user} = data;
+      
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('userId', user.id);
+      
+      userDispatch({type: 'LOGIN', data: {...user}});
+
+      router.push('/');
+    }).catch((error) => {
+      console.log(error);
+    })
   };
 
   return (
@@ -63,7 +95,7 @@ const LoginPage: NextPage = () => {
         {
           !!error.password && <ErrorText>{error.password}</ErrorText>
         }
-        <LoginButton disabled={error.id === undefined || !!error.id || error.password === undefined || !!error.password}>로그인</LoginButton>
+        <LoginButton disabled={error.id === undefined || !!error.id || error.password === undefined || !!error.password} onClick={onLogin}>로그인</LoginButton>
       </Form>
     </>
   );

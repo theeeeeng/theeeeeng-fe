@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import setupMSW from '../api/setup';
 import GlobalStyle from '../styles/GlobalStyle';
+import { UserProvider } from '../context/User';
 
 setupMSW();
 
@@ -12,7 +13,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       <GlobalStyle />
       <Background />
       <Content>
-        <Component {...pageProps} />
+        <UserProvider>
+          <Component {...pageProps} />
+        </UserProvider>
       </Content>
     </>
   );
