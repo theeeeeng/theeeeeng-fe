@@ -1,12 +1,36 @@
 import Link from 'next/link';
 import type { NextPage } from 'next';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import products from '../../api/data/products.json';
+import { useRouter } from 'next/router';
+import {Product} from '../../types/product';
+import NotFound from '../../components/NotFound';
 
 const ProductDetailPage: NextPage = () => {
-  const product = products[0];
+  const router = useRouter();
+  const [product, setProduct] = useState<Product | null>();
+
+  useEffect(() => {
+    const {query} = router;
+    if (query.id) {
+      productDetail(Number(query.id));
+    }
+  }, [router]);
+
+  const productDetail = (id: number) => {
+    const detail = fetch(`https://api.sixshop.com/products/${id}`).then(res => res.json()).then(({data}) => {
+      if (!data) {
+        setProduct(null);
+        return;
+      }
+      const {product: detail} = data;
+      setProduct(detail);
+    }).catch(error => {
+      console.log(error);
+      setProduct(null);
+    });
+  };
 
   return (
     <>
@@ -18,11 +42,19 @@ const ProductDetailPage: NextPage = () => {
           <p>login</p>
         </Link>
       </Header>
-      <Thumbnail src={product.thumbnail ? product.thumbnail : '/defaultThumbnail.jpg'} />
-      <ProductInfoWrapper>
-        <Name>{product.name}</Name>
-        <Price>{product.price}원</Price>
-      </ProductInfoWrapper>
+      {
+        product &&
+          <>
+            <Thumbnail src={product.thumbnail ? product.thumbnail : '/defaultThumbnail.jpg'} />
+            <ProductInfoWrapper>
+              <Name>{product.name}</Name>
+              <Price>{product.price}원</Price>
+            </ProductInfoWrapper>
+          </>
+      }
+      {
+        !product && <NotFound/>
+      }
     </>
   );
 };
