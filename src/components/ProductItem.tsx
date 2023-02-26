@@ -12,7 +12,7 @@ const ProductItem = ({ product: { name, thumbnail, price, id } }: ProductItemPro
 
   return <>
     <Container onClick={() => router.push(`/products/${id}`)}>
-      <Thumbnail src={thumbnail ? thumbnail : '/defaultThumbnail.jpg'} />
+      <Thumbnail src={thumbnail ? thumbnail : '/defaultThumbnail.jpg'} alt={`${id}번 상품의 썸네일`}/>
       <Name>{name}</Name>
       <Price>{price}</Price>
   </Container>
