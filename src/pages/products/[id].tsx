@@ -48,7 +48,7 @@ const ProductDetailPage: NextPage = () => {
             <Thumbnail src={product.thumbnail ? product.thumbnail : '/defaultThumbnail.jpg'} alt={`${product.name}의 상품 이미지`}/>
             <ProductInfoWrapper>
               <Name>{product.name}</Name>
-              <Price>{product.price}원</Price>
+              <Price>{product.price.toLocaleString()}원</Price>
             </ProductInfoWrapper>
           </>
       }
