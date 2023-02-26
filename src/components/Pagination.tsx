@@ -1,21 +1,59 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { VscChevronLeft, VscChevronRight } from 'react-icons/vsc';
+import { usePagination } from '../hooks/usePagination';
+import { useRouter } from 'next/router';
 
-const Pagination = () => {
+const Pagination = ({total, onChangePage}: {total: number, onChangePage: (page: number) => void}) => {
+  const router = useRouter();
+  const {page} = router.query;
+  const {current, setCurrent, start, setStart, end, setEnd, maxPage} = usePagination(total);
+
+  useEffect(() => {
+    if (page === undefined) {
+      setCurrent(1);
+    } else if (Number(page) !== current) {
+      setCurrent(Number(page));
+    }
+  }, [page]);
+
+  const handleSelectPage = (page: number) => {
+    setCurrent(page);
+    onChangePage(page);
+  };
+  
+  const onClickPrev = () => {
+    const prevCurrent = Math.floor(current / 5) * 5;
+    onChangePage(prevCurrent);
+    setCurrent(prevCurrent);
+  };
+
+  const onClickNext = () => {
+    let nextCurrent = Math.floor(current / 5) * 5 + 6;
+
+    if (nextCurrent > maxPage) {
+      nextCurrent = maxPage;
+    }
+    
+    onChangePage(nextCurrent);
+    setCurrent(nextCurrent);
+  };
+
   return (
     <Container>
-      <Button disabled>
+      <Button disabled={start === 1} onClick={onClickPrev}>
         <VscChevronLeft />
       </Button>
       <PageWrapper>
-        {[1, 2, 3, 4, 5].map((page) => (
-          <Page key={page} selected={page === 1} disabled={page === 1}>
-            {page}
-          </Page>
-        ))}
+        {
+          Array.from({length: (end - start) + 1}, (value, index) => start + index).map((page) => 
+            <Page key={page} selected={page === current} disabled={page === current} onClick={() => handleSelectPage(page)}>
+              {page}
+            </Page>
+          )
+        }
       </PageWrapper>
-      <Button disabled={false}>
+      <Button disabled={maxPage === end} onClick={onClickNext}>
         <VscChevronRight />
       </Button>
     </Container>
