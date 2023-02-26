@@ -1,23 +1,30 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import type { NextPage } from 'next';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import products from '../api/data/products.json';
 import ProductList from '../components/ProductList';
 import Pagination from '../components/Pagination';
 import { useUserDispatch, useUserState } from '../context/User';
 
 const HomePage: NextPage = () => {
+  const router = useRouter();
   const userState = useUserState();
   const userDispatch = useUserDispatch();
-  const router = useRouter();
   const { page } = router.query;
+  const [productList, setProductList] = useState({
+    products: [],
+    totalCount: 0
+  });
 
   useEffect(() => {
     userInfo();
   }, []);
+
+  useEffect(() => {
+    productsByPage(page ? Number(page) : 1);
+  }, [page]);
 
   const userInfo = () => {
     const userId = localStorage.getItem('userId');
@@ -43,6 +50,14 @@ const HomePage: NextPage = () => {
     logout();
   };
 
+  const productsByPage = (page: number) => {
+    const list = fetch(`https://api.sixshop.com/products?page=${page}&size=10`).then(res => res.json()).then(({data}) => {
+      setProductList({...data});
+    }).catch(error => {
+      console.log(error);
+    });
+  };
+
   return (
     <>
       <Header>
@@ -57,8 +72,8 @@ const HomePage: NextPage = () => {
         }
       </Header>
       <Container>
-        <ProductList products={products.slice(0, 10)} />
-        <Pagination />
+        <ProductList products={productList.products} />
+        <Pagination total={productList.totalCount} onChangePage={(page) => router.push({query: {page}})}/>
       </Container>
     </>
   );

@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
 
 import { Product } from '../types/product';
@@ -6,13 +7,17 @@ type ProductItemProps = {
   product: Product;
 };
 
-const ProductItem = ({ product: { name, thumbnail, price } }: ProductItemProps) => (
-  <Container>
-    <Thumbnail src={thumbnail ? thumbnail : '/defaultThumbnail.jpg'} />
-    <Name>{name}</Name>
-    <Price>{price}</Price>
+const ProductItem = ({ product: { name, thumbnail, price, id } }: ProductItemProps) => {
+  const router = useRouter();
+
+  return <>
+    <Container onClick={() => router.push(`/products/${id}`)}>
+      <Thumbnail src={thumbnail ? thumbnail : '/defaultThumbnail.jpg'} />
+      <Name>{name}</Name>
+      <Price>{price}</Price>
   </Container>
-);
+  </>
+};
 
 export default ProductItem;
 
@@ -20,6 +25,10 @@ const Container = styled.a`
   width: 180px;
   margin-left: 20px;
   margin-top: 20px;
+
+  $:hover {
+    cursor: pointer;
+  }
 `;
 
 const Thumbnail = styled.img`
