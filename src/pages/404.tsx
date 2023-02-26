@@ -3,7 +3,7 @@ import NotFound from '../components/NotFound';
 import Link from 'next/link';
 import styled from 'styled-components';
 
-const ErrorPage: NextPage = () => {
+const NotFoundPage: NextPage = () => {
     return <>
         <Header>
             <Link href='/'>
@@ -19,7 +19,7 @@ const ErrorPage: NextPage = () => {
     </>;
 };
 
-export default ErrorPage;
+export default NotFoundPage;
 
 const Header = styled.div`
   display: flex;
